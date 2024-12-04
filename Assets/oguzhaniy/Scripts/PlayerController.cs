@@ -4,7 +4,7 @@ public class PlayerController : MonoBehaviour
 {
     [Header("References")]
     private CharacterController controller;
-    [SerializeField] private Transform camera;
+    [SerializeField] private Transform playerCamera;
 
     [Header("Movement Settings")]
     [SerializeField] private float walkSpeed = 5f;
@@ -41,7 +41,7 @@ public class PlayerController : MonoBehaviour
     private void GroundMovement()
     {
         Vector3 move = new Vector3(turnInput, 0, moveInput);
-        move = camera.transform.TransformDirection(move);
+        move = playerCamera.transform.TransformDirection(move);
 
         if (Input.GetKey(KeyCode.LeftShift))
         {
