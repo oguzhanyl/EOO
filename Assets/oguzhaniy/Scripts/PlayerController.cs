@@ -1,10 +1,12 @@
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("References")]
     private CharacterController controller;
-    [SerializeField] private Transform camera;
+    [SerializeField] private CinemachineCamera virtualCamera;
+    [SerializeField] private Transform playerCamera;
 
     [Header("Movement Settings")]
     [SerializeField] private float walkSpeed = 5f;
@@ -14,12 +16,18 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float gravity = 9.81f;
     [SerializeField] private float jumpHeight = 2f;
 
+
     private float verticalVelocity;
     private float speed;
 
+    private float xRotation;
+
     [Header("Input")]
+    [SerializeField] private float mouseSensitivity;
     private float moveInput;
     private float turnInput;
+    private float mouseX;
+    private float mouseY;
 
     private void Start()
     {
@@ -41,7 +49,7 @@ public class PlayerController : MonoBehaviour
     private void GroundMovement()
     {
         Vector3 move = new Vector3(turnInput, 0, moveInput);
-        move = camera.transform.TransformDirection(move);
+        move = playerCamera.transform.TransformDirection(move);
 
         if (Input.GetKey(KeyCode.LeftShift))
         {
@@ -61,19 +69,19 @@ public class PlayerController : MonoBehaviour
 
     private void Turn()
     {
-        if(Mathf.Abs(turnInput) > 0 || Mathf.Abs(moveInput) > 0)
-        {
+        mouseX *= mouseSensitivity * Time.deltaTime;
+        mouseY *= mouseSensitivity * Time.deltaTime;
 
-            Vector3 currentLookDirection = controller.velocity.normalized;
-            currentLookDirection.y = 0;
+        xRotation -= mouseY;
 
-            currentLookDirection.Normalize();
+        xRotation = Mathf.Clamp(xRotation, -90, 90);
 
-            Quaternion targetRotation = Quaternion.LookRotation(currentLookDirection);
+        virtualCamera.transform.localRotation = Quaternion.Euler(xRotation, 0, 0);
 
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * turningSpeed);
-        }
+        transform.Rotate(Vector3.up * mouseX);
     }
+
+    
 
     private float VerticalForceCalculation()
     {
@@ -96,5 +104,7 @@ public class PlayerController : MonoBehaviour
     {
         moveInput = Input.GetAxis("Vertical");
         turnInput = Input.GetAxis("Horizontal");
+        mouseX = Input.GetAxis("Mouse X");
+        mouseY = Input.GetAxis("Mouse Y");
     }
 }
